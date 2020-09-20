@@ -3,10 +3,30 @@ jmp 0x0000:start
 
 data:   ;Todos os dados do programa ficarão aqui
 
-    mensagem db 'Comecamos o projeto hahaha',0
-    string times 20 db 0
-    X times 10 db 0
-    valor times 10 db 0
+    ;Strings do Menu
+    stringTitle db 'Titulo...',0
+    stringPlay db 'Start Game(1)',0
+    stringHowToPlay db 'How To Play(2)',0
+    stringCredits db 'Credits(3)',0
+
+    ;Strings do Play
+    stringPlayTitle db 'Play',0
+    stringPlay1 db 'Coming Soon...',0
+
+    ;Strings do Load
+    stringLoad db 'Loading...', 0
+
+    ;Strings do HowToPlay
+    stringHowToPlayTitle db 'How To Play',0
+    stringHowToPlay1 db 'Te vira meu pco...',0
+    stringEsc   db 'Press ESC to return...',0
+
+    ;Strings do Credits
+    stringCreditsTitle db 'Credits',0
+    stringCredits1 db 'Allan Soares Vasconcelos <asv>',0
+    stringCredits2 db 'Amanda Lima Lassere <all2>',0
+    stringCredits3 db 'Macio Monteiro de Meneses Jr <mmmj>',0
+    stringCredits4 db 'Maria Isabel Fernandes dos Santos <mifs>',0
 
 gets:   ;leitor de string (Com atualização para permitir backspace)
 
@@ -91,24 +111,13 @@ putchar:    ;Função responsavel por printar um caracter
     int 10h
     ret
 
-clear:  ;Função para limpar a tela (mov bl, color)                    
- 
-    mov dx, 0       ;Set the cursor to top left-most corner of screen
-    mov bh, 0      
-    mov ah, 0x2
-    int 0x10
-    
-    mov cx, 2000    ;Print 2000 blank chars to clean
-    mov bh, 0
-    mov al, 0x20    ;Blank char
-    mov ah, 0x9
-    int 0x10
-    
-    mov dx, 0       ;Reset cursor to top left-most corner of screen
-    mov bh, 0      
-    mov ah, 0x2
-    int 0x10
+clearTela:
+
+    mov ah, 0
+    mov al,12h
+    int 10h
     ret
+
 
 start:
     
@@ -116,21 +125,233 @@ start:
     mov ds, ax      ;limpando ds
     mov es, ax      ;limpando es
 
-    mov bl,15       ;Cor da String em bl
-    call clear      ;Limpando a tela
+    call menu
+    jmp done
 
-    mov si, mensagem    ;Imprimindo mensagem
-    call prints         ;Printa string
-    call endl           ;Pula uma linha
+menu:   ;Configurações do Menu
+
+    call clearTela  ;Configurando o modo de video
+
+    ;Colocando string "stringTitle"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 3    ;Linha
+	mov dl, 32   ;Coluna
+	int 10h 
+    mov si, stringTitle
+    call prints
+
+    ;Colocando string "stringPlay"
+    mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+	mov dh, 15   ;Linha
+	mov dl, 32   ;Coluna
+	int 10h
+    mov si, stringPlay
+    call prints
+
+    ;Colocando string "stringHowToPlay"
+    mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+	mov dh, 20   ;Linha
+	mov dl, 32   ;Coluna
+	int 10h
+    mov si, stringHowToPlay
+    call prints
+
+    ;Colocando string "stringCredits"
+    mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+	mov dh, 25   ;Linha
+	mov dl, 32   ;Coluna
+	int 10h
+    mov si, stringCredits
+    call prints
+
+    .selecao:
+
+        call getchar
+
+        cmp al, 49      ;Comparando com '1'
+        je play
+
+        cmp al, 50      ;Comparando com '2'
+        je howToPlay
+        
+        cmp al, 51      ;Comparando com '3'
+        je credits
+
+        jmp .selecao    ;Se não for nenhuma das opções, fica no loop!
+
+play:   ;Aqui ficara toda a lógica do jogo!
+
+    call clearTela  ;Limpa a tela
+
+    ;Colocando string "stringPlayTitle"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 3    ;Linha
+	mov dl, 32   ;Coluna
+	int 10h 
+    mov si, stringPlayTitle
+    call prints
+
+    ;Colocando string "stringPlay1"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 15    ;Linha
+	mov dl, 32   ;Coluna
+	int 10h 
+    mov si, stringPlay1
+    call prints
+
+    ;Colocando string "stringEsc"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 28    ;Linha
+	mov dl, 32   ;Coluna
+	int 10h 
+    mov si, stringEsc
+    call prints
+
+    jmp .retornoEsc
+
+    .retornoEsc: 
+
+        call getchar
+
+        cmp al, 27  ;Se ele receber o Esc volta para o Menu
+        je menu
+
+        jne .retornoEsc
+
+howToPlay:  ;Instruções do jogo
+
+    call clearTela  ;Limpa a tela
+
+    ;Colocando string "stringHowToPlayTitle"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 3    ;Linha
+	mov dl, 32   ;Coluna
+	int 10h 
+    mov si, stringHowToPlayTitle
+    call prints
+
+    ;Colocando string "stringHowToPlay1"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 10    ;Linha
+	mov dl, 32   ;Coluna
+	int 10h 
+    mov si, stringHowToPlay1
+    call prints
+
+    ;Colocando string "stringEsc"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 28    ;Linha
+	mov dl, 32   ;Coluna
+	int 10h 
+    mov si, stringEsc
+    call prints
+
+    jmp .retornoEsc
+
+    .retornoEsc: 
+
+        call getchar
+
+        cmp al, 27  ;Se ele receber o Esc volta para o Menu
+        je menu
+
+        jne .retornoEsc
+
+credits:    ;Créditos do jogo
+
+    call clearTela  ;Limpa a tela
+
+    ;Colocando string "stringCreditsTitle"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 3    ;Linha
+	mov dl, 32   ;Coluna
+	int 10h 
+    mov si, stringCreditsTitle
+    call prints
+
+    ;Colocando string "stringCredits1"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 10    ;Linha
+	mov dl, 5   ;Coluna
+	int 10h 
+    mov si, stringCredits1
+    call prints
+
+    ;Colocando string "stringCredits2"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 11    ;Linha
+	mov dl, 5   ;Coluna
+	int 10h 
+    mov si, stringCredits2
+    call prints
+    
+    ;Colocando string "stringCredits3"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 12    ;Linha
+	mov dl, 5   ;Coluna
+	int 10h 
+    mov si, stringCredits3
+    call prints
+
+    ;Colocando string "stringCredits4"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 13    ;Linha
+	mov dl, 5   ;Coluna
+	int 10h 
+    mov si, stringCredits4
+    call prints
+    
+    ;Colocando string "stringEsc"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,15    ;Cor da String em bl
+	mov dh, 28    ;Linha
+	mov dl, 32   ;Coluna
+	int 10h 
+    mov si, stringEsc
+    call prints
+
+    jmp .retornoEsc
+
+    .retornoEsc: 
+
+        call getchar
+
+        cmp al, 27  ;Se ele receber o Esc volta para o Menu
+        je menu
+
+        jne .retornoEsc
 
 done:
 
     jmp $
-
-
-
-
-
 
 ;---------------------------------------------------------------------------------------------------------------------
 ;Funções que talvez use
@@ -191,4 +412,23 @@ strcmp:              ; mov si, string1, mov di, string2, compara as strings apon
     ret
   .equal:
     stc
+    ret
+
+clear:  ;Função para limpar a tela                  
+ 
+    mov dx, 0       ;Set the cursor to top left-most corner of screen
+    mov bh, 0      
+    mov ah, 0x2
+    int 0x10
+    
+    mov cx, 2000    ;Print 2000 blank chars to clean
+    mov bh, 0
+    mov al, 0x20    ;Blank char
+    mov ah, 0x9
+    int 0x10
+    
+    mov dx, 0       ;Reset cursor to top left-most corner of screen
+    mov bh, 0      
+    mov ah, 0x2
+    int 0x10
     ret
