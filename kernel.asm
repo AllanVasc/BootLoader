@@ -10,11 +10,7 @@ data:   ;Todos os dados do programa ficarão aqui
     stringCredits db 'Credits(3)',0
 
     ;Strings do Play
-    stringPlayTitle db 'Play',0
-    stringPlay1 db 'Coming Soon...',0
-
-    ;Strings do Load
-    stringLoad db 'Loading...', 0
+    stringPlayTitle db 'Sudoku',0
 
     ;Strings do HowToPlay
     stringHowToPlayTitle db 'How To Play',0
@@ -28,96 +24,147 @@ data:   ;Todos os dados do programa ficarão aqui
     stringCredits3 db 'Macio Monteiro de Meneses Jr <mmmj>',0
     stringCredits4 db 'Maria Isabel Fernandes dos Santos <mifs>',0
 
-gets:   ;leitor de string (Com atualização para permitir backspace)
+    ;Sudoku
 
-    xor cx, cx  ;Contador utilizado para permitir backspace
+    whiteColor equ 15
+    greenColor equ 2
+    redColor equ 4
 
-    .loop1:
+    sudoku  db '0','7','4','0','0','0','0','8','1'
+            db '6','0','0','4','9','1','0','0','0'
+            db '2','0','0','0','0','5','4','0','3'
+            db '0','4','0','0','1','2','3','7','0'
+            db '0','3','0','9','4','0','1','0','5'
+            db '0','5','2','6','0','3','0','4','0'
+            db '0','0','1','8','2','0','0','9','4'
+            db '4','0','0','3','0','9','6','0','0'
+            db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
 
-        call getchar    ;Função para ler um char!
-        cmp al, 0x08    ;Backspace
-        je .backspace   ;Tratar do backSpace
+    CanChangeSudoku db '1','0','0','1','1','1','1','0','0'
+                    db '0','1','1','0','0','0','1','1','1'
+                    db '0','1','1','1','1','0','0','1','0'
+                    db '1','0','1','1','0','0','0','0','1'
+                    db '1','0','1','0','0','1','0','1','0'
+                    db '1','0','0','0','1','0','1','0','1'
+                    db '1','1','0','0','0','1','1','0','0'
+                    db '0','1','1','0','1','0','0','1','1'
+                    db '0','1','0','1','0','1','0','1','1', 0 ;Esse 0 a mais sinaliza o fim! 
 
-        cmp al, 0x0d    ;Ve se foi inserido o enter (0x0d == 13)
-        je .done
+    msgLinhaAtual db 'Linha:' , 0
+    msgColunaAtual db 'Coluna:' , 0
 
-        cmp cl, 10      ;Limite da String
-        je .loop1
-    
-        stosb           ;Vai guardar o char em AL para o DI       
-        inc cl          ;Vai inc o contador de caracteres
-        call putchar    ;Printa a letra
-    
-        jmp .loop1
+    linhaSudoku TIMES 2 db 0
+    colunaSudoku TIMES 2 db 0
 
-    .backspace:
-
-        cmp cl, 0       ;Conferindo para saber se já esta vazio
-        je .loop1
-
-        dec di          ;Deletando o ultimo char inserido
-        dec cl
-        mov byte[di], 0
-        call delchar
-
-        jmp .loop1
-
-    .done:
-    
-        mov al, 0
-        stosb
-        call endl
-        ret
-    
-getchar:    ;Pega o caractere lido no teclado e salva em al
-
-    mov ah, 0x00
-    int 16h
-    ret
-
-delchar:    ;Deleta um caractere lido no teclado
-
-    mov al, 0x08          ;BackSpace
-    call putchar
-    mov al, ' '
-    call putchar
-    mov al, 0x08          ;BackSpace
-    call putchar
-    ret
-  
-endl:       ;Pula uma linha, printando na tela o caractere que representa o /n
-
-    mov al, 0x0a          ; line feed
-    call putchar
-    mov al, 0x0d          ; carriage return
-    call putchar
-    ret
+    endl db ' ',13,10,0
 
 prints: ;mov si, string (Vai printar a string que o SI esta apontando)
 
     .loop:
-        lodsb           ; bota character apontado por si em al 
-        cmp al, 0       ; 0 é o valor atribuido ao final de uma string
-        je .endloop     ; Se for o final da string, acaba o loop
-        call putchar    ; printa o caractere
-        jmp .loop       ; volta para o inicio do loop
+
+        lodsb               ; bota character apontado por si em al 
+        cmp al, 0           ; 0 é o valor atribuido ao final de uma string
+            je .endloop     ; Se for o final da string, acaba o loop
+        call putChar        ; printa o caractere
+
+        jmp .loop           ; volta para o inicio do loop
+
+    .endloop:
+
+        ret
+
+printsSudoku:               ; mov si, string (Vai printar a string que o SI esta apontando)
+
+    xor cx, cx              ;Contador utilizado para pular as linhas!
+
+    .loop:
+
+        lodsb               ; bota character em SI para o AL 
+        cmp al, 0
+            je .endloop
+
+        cmp al, '0'         ;Se for '0' muda a cor para vermelho!
+            je .putRed
+
+        mov bl, greenColor  ;Se não for, printa o verde!
+        call putChar
+
+        inc cx              ;Contando a quantidade de digitos
+        cmp cx, 9           ;Se for igual a 9 precisa pular a linha
+            je .putEndl
+
+        jmp .loop
+
+    .putRed:
+
+        mov bl, redColor
+        call putChar
+
+        inc cx              ;Contando a quantidade de digitos
+        cmp cx, 9           ;Se for igual a 9 precisa pular a linha
+            je .putEndl
+
+        jmp .loop
+
+    .putEndl:
+
+        xor cx, cx  ;       Zerando novamente o contador!     
+        mov al, 13
+        call putChar
+        mov al, 10
+        call putChar
+        call colocaEspaco
+        jmp .loop
 
     .endloop:
         ret
 
-putchar:    ;Função responsavel por printar um caracter
+colocaEspaco:       ;Usada para centralizar o sudoku no meio da tela
+
+    xor cx,cx
+
+    .loop:
+
+        cmp cx,36   ;Modificar esse número para centralização
+            je .done
+
+        mov al, ' '
+        call putChar
+        inc cx
+        
+        jmp .loop
+
+    .done:
+
+        xor cx,cx
+        ret
+
+putChar:    ;Função responsavel por printar um caracter
 
     mov ah, 0x0e
     int 10h
     ret
+  
+putEndl:        ;Pula uma linha, printando na tela o caractere que representa o /n
 
-clearTela:
+    mov al, 0x0a    ; line feed
+    call putChar
+    mov al, 0x0d    ; carriage return
+    call putChar
+    ret
+
+getChar:    ;Pega o caractere lido no teclado e salva em al
+
+    mov AH, 0x00
+    int 16h
+    ret
+
+clearTela:  ;Função responsável por atualizar a tela
 
     mov ah, 0
     mov al,12h
     int 10h
     ret
-
 
 start:
     
@@ -135,7 +182,7 @@ menu:   ;Configurações do Menu
     ;Colocando string "stringTitle"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor   ;Cor da String em bl
 	mov dh, 3    ;Linha
 	mov dl, 32   ;Coluna
 	int 10h 
@@ -145,7 +192,7 @@ menu:   ;Configurações do Menu
     ;Colocando string "stringPlay"
     mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-	mov dh, 15   ;Linha
+	mov dh, whiteColor   ;Linha
 	mov dl, 32   ;Coluna
 	int 10h
     mov si, stringPlay
@@ -171,7 +218,7 @@ menu:   ;Configurações do Menu
 
     .selecao:
 
-        call getchar
+        call getChar
 
         cmp al, 49      ;Comparando com '1'
         je play
@@ -191,43 +238,166 @@ play:   ;Aqui ficara toda a lógica do jogo!
     ;Colocando string "stringPlayTitle"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 3    ;Linha
 	mov dl, 32   ;Coluna
 	int 10h 
     mov si, stringPlayTitle
     call prints
 
-    ;Colocando string "stringPlay1"
-	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
-	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
-	mov dh, 15    ;Linha
-	mov dl, 32   ;Coluna
-	int 10h 
-    mov si, stringPlay1
-    call prints
-
     ;Colocando string "stringEsc"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 28    ;Linha
 	mov dl, 32   ;Coluna
 	int 10h 
     mov si, stringEsc
     call prints
 
-    jmp .retornoEsc
+    ;Colocando o sudoku
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+	mov dh, 8    ;Linha
+	mov dl, 36   ;Coluna
+	int 10h 
+    mov SI, sudoku  
+    call printsSudoku
 
-    .retornoEsc: 
+    ;Debugando para saber a linha e a coluna atual!
+    call putEndl
+    mov bl, whiteColor
+    mov SI, msgLinhaAtual  
+    call prints
 
-        call getchar
+    mov SI, linhaSudoku ;SI ira apontar para o endereço da variavel  
+    mov al, [esi]       ;Pegamos o valor o qual o SI está apontando 
+    add al,'0'
+    call putChar
 
-        cmp al, 27  ;Se ele receber o Esc volta para o Menu
+    call putEndl
+
+    mov SI, msgColunaAtual  
+    call prints
+    mov SI, colunaSudoku  
+    mov al, [esi]      ; Load a double word from memory into eax
+    add al,'0'
+    call putChar
+
+    ;Lógica de incrementar e decrementar a linha e a coluna
+    call getChar
+
+    cmp al, 'w'
+        je .decrementaLinha
+
+    cmp al, 'a'
+        je .decrementaColuna
+
+    cmp al, 's'
+        je .incrementaLinha
+
+    cmp al, 'd'
+        je .incrementaColuna
+
+    ;Lógica de mudar os numeros da matriz!
+
+    cmp al,'1'
+        je .mudaMatriz
+    cmp al,'2'
+        je .mudaMatriz
+    cmp al,'3'
+        je .mudaMatriz
+    cmp al,'4'
+        je .mudaMatriz
+    cmp al,'5'
+        je .mudaMatriz
+    cmp al,'6'
+        je .mudaMatriz
+    cmp al,'7'
+        je .mudaMatriz
+    cmp al,'8'
+        je .mudaMatriz
+    cmp al,'9'
+        je .mudaMatriz
+
+    cmp al, 27  ;Se ele receber o Esc volta para o Menu
         je menu
+        
+    jmp play
 
-        jne .retornoEsc
+    .decrementaLinha:
+
+        mov SI, linhaSudoku  
+        mov al, [esi]      ; Load a double word from memory into eax
+        cmp al, 0          ;Se já esta no limite, volta pro play
+            je play
+
+        dec al
+        mov [esi], al      ; Store a double word in eax into memory
+
+        jmp play 
+
+    .decrementaColuna:
+
+        mov SI, colunaSudoku  
+        mov al, [esi]      ; Load a double word from memory into eax
+        cmp al, 0          ;Se já esta no limite, volta pro play
+            je play
+
+        dec al
+        mov [esi], al      ; Store a double word in eax into memory
+
+        jmp play
+
+    .incrementaLinha:
+
+        mov SI, linhaSudoku  
+        mov al, [esi]      ; Load a double word from memory into eax
+        cmp al, 8          ;Se já esta no limite, volta pro play
+            je play
+
+        inc al
+        mov [esi], al      ; Store a double wosrd in eax into memory
+
+        jmp play
+
+    .incrementaColuna:
+
+        mov SI, colunaSudoku  
+        mov al, [esi]      ; Load a double word from memory into eax
+        cmp al, 8          ;Se já esta no limite, volta pro play
+            je play
+
+        inc al
+        mov [esi], al      ; Store a double word in eax into memory
+
+        jmp play
+
+    .mudaMatriz:        ;(DH == Linha sudoku e DL == ColunaSudoku )
+
+        mov cl, al      ;Cl ira guardar temporariamente al
+        xor edi, edi    ;Zerando o di
+
+        mov SI, linhaSudoku  
+        mov dh, [esi]      ; Load a double word from memory into eax
+        mov SI, colunaSudoku  
+        mov dl, [esi]      ; Load a double word from memory into eax
+
+        mov al, 9           ;Inicio do calculo da posição da matriz!
+        mul DH              ; AL = AL * DH
+        add al, dl          ;O valor da posição da matriz estara em al!
+        mov edi, eax        ;Passando valor de al para o registrador de segmento(como se fosse ponteiro)
+        
+        ;Irei descobrir se eu posso mudar ou se são os valores padrões!
+        mov SI, CanChangeSudoku
+        mov dl, [esi + edi]       ;dl ficara com '0' ou '1'
+        cmp dl, '0'               ;Se não pode mudar volta para o play
+            je play
+
+        mov SI, sudoku          ;Se for possivel mudar,ele muda a matriz!
+        mov [esi + edi], cl
+
+        jmp play
 
 howToPlay:  ;Instruções do jogo
 
@@ -236,7 +406,7 @@ howToPlay:  ;Instruções do jogo
     ;Colocando string "stringHowToPlayTitle"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 3    ;Linha
 	mov dl, 32   ;Coluna
 	int 10h 
@@ -246,7 +416,7 @@ howToPlay:  ;Instruções do jogo
     ;Colocando string "stringHowToPlay1"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 10    ;Linha
 	mov dl, 32   ;Coluna
 	int 10h 
@@ -256,7 +426,7 @@ howToPlay:  ;Instruções do jogo
     ;Colocando string "stringEsc"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 28    ;Linha
 	mov dl, 32   ;Coluna
 	int 10h 
@@ -267,7 +437,7 @@ howToPlay:  ;Instruções do jogo
 
     .retornoEsc: 
 
-        call getchar
+        call getChar
 
         cmp al, 27  ;Se ele receber o Esc volta para o Menu
         je menu
@@ -281,7 +451,7 @@ credits:    ;Créditos do jogo
     ;Colocando string "stringCreditsTitle"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 3    ;Linha
 	mov dl, 32   ;Coluna
 	int 10h 
@@ -291,7 +461,7 @@ credits:    ;Créditos do jogo
     ;Colocando string "stringCredits1"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 10    ;Linha
 	mov dl, 5   ;Coluna
 	int 10h 
@@ -301,7 +471,7 @@ credits:    ;Créditos do jogo
     ;Colocando string "stringCredits2"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 11    ;Linha
 	mov dl, 5   ;Coluna
 	int 10h 
@@ -311,7 +481,7 @@ credits:    ;Créditos do jogo
     ;Colocando string "stringCredits3"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 12    ;Linha
 	mov dl, 5   ;Coluna
 	int 10h 
@@ -321,7 +491,7 @@ credits:    ;Créditos do jogo
     ;Colocando string "stringCredits4"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 13    ;Linha
 	mov dl, 5   ;Coluna
 	int 10h 
@@ -331,7 +501,7 @@ credits:    ;Créditos do jogo
     ;Colocando string "stringEsc"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,15    ;Cor da String em bl
+    mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 28    ;Linha
 	mov dl, 32   ;Coluna
 	int 10h 
@@ -342,7 +512,7 @@ credits:    ;Créditos do jogo
 
     .retornoEsc: 
 
-        call getchar
+        call getChar
 
         cmp al, 27  ;Se ele receber o Esc volta para o Menu
         je menu
@@ -431,4 +601,55 @@ clear:  ;Função para limpar a tela
     mov bh, 0      
     mov ah, 0x2
     int 0x10
+    ret
+
+gets:   ;leitor de string (Com atualização para permitir backspace)
+
+    xor cx, cx  ;Contador utilizado para permitir backspace
+
+    .loop1:
+
+        call getChar    ;Função para ler um char!
+        cmp al, 0x08    ;Backspace
+        je .backspace   ;Tratar do backSpace
+
+        cmp al, 0x0d    ;Ve se foi inserido o enter (0x0d == 13)
+        je .done
+
+        cmp cl, 10      ;Limite da String
+        je .loop1
+    
+        stosb           ;Vai guardar o char em AL para o DI       
+        inc cl          ;Vai inc o contador de caracteres
+        call putChar    ;Printa a letra
+    
+        jmp .loop1
+
+    .backspace:
+
+        cmp cl, 0       ;Conferindo para saber se já esta vazio
+        je .loop1
+
+        dec di          ;Deletando o ultimo char inserido
+        dec cl
+        mov byte[di], 0
+        call delchar
+
+        jmp .loop1
+
+    .done:
+    
+        mov al, 0
+        stosb
+        call putEndl
+        ret
+
+delchar:    ;Deleta um caractere lido no teclado
+
+    mov al, 0x08          ;BackSpace
+    call putChar
+    mov al, ' '
+    call putChar
+    mov al, 0x08          ;BackSpace
+    call putChar
     ret
