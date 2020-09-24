@@ -30,15 +30,25 @@ data:   ;Todos os dados do programa ficarão aqui
     greenColor equ 2
     redColor equ 4
 
-    sudoku  db '0','7','4','0','0','0','0','8','1'
-            db '6','0','0','4','9','1','0','0','0'
-            db '2','0','0','0','0','5','4','0','3'
-            db '0','4','0','0','1','2','3','7','0'
-            db '0','3','0','9','4','0','1','0','5'
-            db '0','5','2','6','0','3','0','4','0'
-            db '0','0','1','8','2','0','0','9','4'
-            db '4','0','0','3','0','9','6','0','0'
-            db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
+    sudokuBackup    db '0','7','4','0','0','0','0','8','1'
+                    db '6','0','0','4','9','1','0','0','0'
+                    db '2','0','0','0','0','5','4','0','3'
+                    db '0','4','0','0','1','2','3','7','0'
+                    db '0','3','0','9','4','0','1','0','5'
+                    db '0','5','2','6','0','3','0','4','0'
+                    db '0','0','1','8','2','0','0','9','4'
+                    db '4','0','0','3','0','9','6','0','0'
+                    db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
+
+    sudokuPlaying    db '0','7','4','0','0','0','0','8','1'
+                    db '6','0','0','4','9','1','0','0','0'
+                    db '2','0','0','0','0','5','4','0','3'
+                    db '0','4','0','0','1','2','3','7','0'
+                    db '0','3','0','9','4','0','1','0','5'
+                    db '0','5','2','6','0','3','0','4','0'
+                    db '0','0','1','8','2','0','0','9','4'
+                    db '4','0','0','3','0','9','6','0','0'
+                    db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
 
     CanChangeSudoku db '1','0','0','1','1','1','1','0','0'
                     db '0','1','1','0','0','0','1','1','1'
@@ -52,6 +62,7 @@ data:   ;Todos os dados do programa ficarão aqui
 
     msgLinhaAtual db 'Linha:' , 0
     msgColunaAtual db 'Coluna:' , 0
+    msgCantChange db 'Cant change' , 0
 
     linhaSudoku TIMES 2 db 0
     colunaSudoku TIMES 2 db 0
@@ -159,6 +170,19 @@ getChar:    ;Pega o caractere lido no teclado e salva em al
     int 16h
     ret
 
+strcpy: ;Função para copiar uma String na outra mov SI, String 1 ; mov DI, String 2 (String 2 <- String 1)
+
+    .loop1:
+
+        lodsb
+        stosb
+        cmp al, 0
+            je .endloop1
+        jmp .loop1
+
+    .endloop1:
+        ret
+
 clearTela:  ;Função responsável por atualizar a tela
 
     mov ah, 0
@@ -234,144 +258,162 @@ menu:   ;Configurações do Menu
 play:   ;Aqui ficara toda a lógica do jogo!
 
     call clearTela  ;Limpa a tela
+    mov SI, linhaSudoku ;Zerando as variaveis antes de iniciar
+    mov al, 0
+    mov [esi], al        
+    mov SI, colunaSudoku 
+    mov [esi], al
+            
+    mov SI, sudokuBackup ;Copiando o novo jogo...
+    mov DI, sudokuPlaying
+    call strcpy
 
-    ;Colocando string "stringPlayTitle"
-	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
-	mov bh, 0    ;Pagina 0
-    mov bl,whiteColor    ;Cor da String em bl
-	mov dh, 3    ;Linha
-	mov dl, 32   ;Coluna
-	int 10h 
-    mov si, stringPlayTitle
-    call prints
+    .loop:
 
-    ;Colocando string "stringEsc"
-	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
-	mov bh, 0    ;Pagina 0
-    mov bl,whiteColor    ;Cor da String em bl
-	mov dh, 28    ;Linha
-	mov dl, 32   ;Coluna
-	int 10h 
-    mov si, stringEsc
-    call prints
+        ;Colocando string "stringPlayTitle"
+        mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+        mov bh, 0    ;Pagina 0
+        mov bl,whiteColor    ;Cor da String em bl
+        mov dh, 3    ;Linha
+        mov dl, 32   ;Coluna
+        int 10h 
+        mov si, stringPlayTitle
+        call prints
 
-    ;Colocando o sudoku
-	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
-	mov bh, 0    ;Pagina 0
-	mov dh, 8    ;Linha
-	mov dl, 36   ;Coluna
-	int 10h 
-    mov SI, sudoku  
-    call printsSudoku
+        ;Colocando string "stringEsc"
+        mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+        mov bh, 0    ;Pagina 0
+        mov bl,whiteColor    ;Cor da String em bl
+        mov dh, 28    ;Linha
+        mov dl, 32   ;Coluna
+        int 10h 
+        mov si, stringEsc
+        call prints
 
-    ;Debugando para saber a linha e a coluna atual!
-    call putEndl
-    mov bl, whiteColor
-    mov SI, msgLinhaAtual  
-    call prints
+        ;Colocando o sudoku
+        mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+        mov bh, 0    ;Pagina 0
+        mov dh, 8    ;Linha
+        mov dl, 36   ;Coluna
+        int 10h 
+        mov SI, sudokuPlaying  
+        call printsSudoku
 
-    mov SI, linhaSudoku ;SI ira apontar para o endereço da variavel  
-    mov al, [esi]       ;Pegamos o valor o qual o SI está apontando 
-    add al,'0'
-    call putChar
+        ;Debugando para saber a linha e a coluna atual!
+        call putEndl
+        mov bl, whiteColor
+        mov SI, msgLinhaAtual  
+        call prints
 
-    call putEndl
+        mov SI, linhaSudoku ;SI ira apontar para o endereço da variavel  
+        mov al, [esi]       ;Pegamos o valor o qual o SI está apontando 
+        add al,'0'
+        call putChar
 
-    mov SI, msgColunaAtual  
-    call prints
-    mov SI, colunaSudoku  
-    mov al, [esi]      ; Load a double word from memory into eax
-    add al,'0'
-    call putChar
+        call putEndl
 
-    ;Lógica de incrementar e decrementar a linha e a coluna
-    call getChar
+        mov SI, msgColunaAtual  
+        call prints
+        mov SI, colunaSudoku  
+        mov al, [esi]      ; Load a double word from memory into eax
+        add al,'0'
+        call putChar
 
-    cmp al, 'w'
-        je .decrementaLinha
+        ;Lógica de incrementar e decrementar a linha e a coluna
+        call getChar
 
-    cmp al, 'a'
-        je .decrementaColuna
+        cmp al, 'w'
+            je .decrementaLinha
 
-    cmp al, 's'
-        je .incrementaLinha
+        cmp al, 'a'
+            je .decrementaColuna
 
-    cmp al, 'd'
-        je .incrementaColuna
+        cmp al, 's'
+            je .incrementaLinha
 
-    ;Lógica de mudar os numeros da matriz!
+        cmp al, 'd'
+            je .incrementaColuna
 
-    cmp al,'1'
-        je .mudaMatriz
-    cmp al,'2'
-        je .mudaMatriz
-    cmp al,'3'
-        je .mudaMatriz
-    cmp al,'4'
-        je .mudaMatriz
-    cmp al,'5'
-        je .mudaMatriz
-    cmp al,'6'
-        je .mudaMatriz
-    cmp al,'7'
-        je .mudaMatriz
-    cmp al,'8'
-        je .mudaMatriz
-    cmp al,'9'
-        je .mudaMatriz
+        ;Lógica de mudar os numeros da matriz!
 
-    cmp al, 27  ;Se ele receber o Esc volta para o Menu
-        je menu
+        cmp al,'1'
+            je .mudaMatriz
+        cmp al,'2'
+            je .mudaMatriz
+        cmp al,'3'
+            je .mudaMatriz
+        cmp al,'4'
+            je .mudaMatriz
+        cmp al,'5'
+            je .mudaMatriz
+        cmp al,'6'
+            je .mudaMatriz
+        cmp al,'7'
+            je .mudaMatriz
+        cmp al,'8'
+            je .mudaMatriz
+        cmp al,'9'
+            je .mudaMatriz
+
+        cmp al, 27  ;Se ele receber o "Esc" volta para o Menu!
+            je menu
+
+;        cmp al, 13  ;Se ele receber o "Enter" checa a resposta!
+;            je checaResposta
         
-    jmp play
+        jmp .loop
 
     .decrementaLinha:
 
         mov SI, linhaSudoku  
         mov al, [esi]      ; Load a double word from memory into eax
-        cmp al, 0          ;Se já esta no limite, volta pro play
-            je play
+        cmp al, 0          ;Se já esta no limite não faz nada
+            je .loop
 
         dec al
         mov [esi], al      ; Store a double word in eax into memory
+        call clearTela
 
-        jmp play 
+        jmp .loop 
 
     .decrementaColuna:
 
         mov SI, colunaSudoku  
         mov al, [esi]      ; Load a double word from memory into eax
-        cmp al, 0          ;Se já esta no limite, volta pro play
-            je play
+        cmp al, 0          ;Se já esta no limite não faz nada
+            je .loop
 
         dec al
         mov [esi], al      ; Store a double word in eax into memory
+        call clearTela
 
-        jmp play
+        jmp .loop
 
     .incrementaLinha:
 
         mov SI, linhaSudoku  
         mov al, [esi]      ; Load a double word from memory into eax
-        cmp al, 8          ;Se já esta no limite, volta pro play
-            je play
+        cmp al, 8          ;Se já esta no limite não faz nada
+            je .loop
 
         inc al
         mov [esi], al      ; Store a double wosrd in eax into memory
+        call clearTela
 
-        jmp play
+        jmp .loop
 
     .incrementaColuna:
 
         mov SI, colunaSudoku  
         mov al, [esi]      ; Load a double word from memory into eax
-        cmp al, 8          ;Se já esta no limite, volta pro play
-            je play
+        cmp al, 8          ;Se já esta no limite não faz nada
+            je .loop
 
         inc al
         mov [esi], al      ; Store a double word in eax into memory
+        call clearTela
 
-        jmp play
+        jmp .loop
 
     .mudaMatriz:        ;(DH == Linha sudoku e DL == ColunaSudoku )
 
@@ -390,14 +432,29 @@ play:   ;Aqui ficara toda a lógica do jogo!
         
         ;Irei descobrir se eu posso mudar ou se são os valores padrões!
         mov SI, CanChangeSudoku
-        mov dl, [esi + edi]       ;dl ficara com '0' ou '1'
-        cmp dl, '0'               ;Se não pode mudar volta para o play
-            je play
+        mov dl, [esi + edi]         ;dl ficara com '0' ou '1'
+        cmp dl, '0'                 ;Se não pode mudar volta para o loop
+            je .cantChange
 
-        mov SI, sudoku          ;Se for possivel mudar,ele muda a matriz!
+        mov SI, sudokuPlaying       ;Se for possivel mudar,ele muda a matriz!
         mov [esi + edi], cl
+        call clearTela
 
-        jmp play
+        jmp .loop
+    
+    .cantChange:
+
+        ;Colocando string "Cant Change"
+        mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+        mov bh, 0    ;Pagina 0
+        mov bl, redColor    ;Cor da String em bl
+        mov dh, 15    ;Linha
+        mov dl, 60   ;Coluna
+        int 10h 
+        mov si, msgCantChange
+        call prints
+
+        jmp .loop
 
 howToPlay:  ;Instruções do jogo
 
