@@ -4,7 +4,7 @@ jmp 0x0000:start
 data:   ;Todos os dados do programa ficarão aqui
 
     ;Strings do Menu
-    stringTitle db 'Titulo...',0
+    stringTitle db 'SUDOKU ASM',0
     stringPlay db 'Start Game(1)',0
     stringHowToPlay db 'How To Play(2)',0
     stringCredits db 'Credits(3)',0
@@ -30,17 +30,7 @@ data:   ;Todos os dados do programa ficarão aqui
     greenColor equ 2
     redColor equ 4
 
-    sudokuBackup    db '5','7','4','2','3','6','9','8','1'
-                    db '6','8','3','4','9','1','7','5','2'
-                    db '2','1','9','7','8','5','4','6','3'
-                    db '9','4','8','5','1','2','3','7','6'
-                    db '7','3','6','9','4','8','1','2','5'
-                    db '1','5','2','6','7','3','8','4','9'
-                    db '3','6','1','8','2','7','5','9','4'
-                    db '4','2','7','3','5','9','6','1','8'
-                    db '8','9','5','1','6','4','2','3','7', 0 ;Esse 0 a mais sinaliza o fim!
-
-    sudokuPlaying    db '0','7','4','0','0','0','0','8','1'
+    sudokuBackup    db '0','7','4','0','0','0','0','8','1'
                     db '6','0','0','4','9','1','0','0','0'
                     db '2','0','0','0','0','5','4','0','3'
                     db '0','4','0','0','1','2','3','7','0'
@@ -49,6 +39,26 @@ data:   ;Todos os dados do programa ficarão aqui
                     db '0','0','1','8','2','0','0','9','4'
                     db '4','0','0','3','0','9','6','0','0'
                     db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
+
+    sudokuPlaying   db '0','7','4','0','0','0','0','8','1'
+                    db '6','0','0','4','9','1','0','0','0'
+                    db '2','0','0','0','0','5','4','0','3'
+                    db '0','4','0','0','1','2','3','7','0'
+                    db '0','3','0','9','4','0','1','0','5'
+                    db '0','5','2','6','0','3','0','4','0'
+                    db '0','0','1','8','2','0','0','9','4'
+                    db '4','0','0','3','0','9','6','0','0'
+                    db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
+
+    sudokuAnswers    db '5','7','4','2','3','6','9','8','1'
+                    db '6','8','3','4','9','1','7','5','2'
+                    db '2','1','9','7','8','5','4','6','3'
+                    db '9','4','8','5','1','2','3','7','6'
+                    db '7','3','6','9','4','8','1','2','5'
+                    db '1','5','2','6','7','3','8','4','9'
+                    db '3','6','1','8','2','7','5','9','4'
+                    db '4','2','7','3','5','9','6','1','8'
+                    db '8','9','5','1','6','4','2','3','7', 0 ;Esse 0 a mais sinaliza o fim!
 
     CanChangeSudoku db '1','0','0','1','1','1','1','0','0'
                     db '0','1','1','0','0','0','1','1','1'
@@ -63,6 +73,9 @@ data:   ;Todos os dados do programa ficarão aqui
     msgLinhaAtual db 'Linha:' , 0
     msgColunaAtual db 'Coluna:' , 0
     msgCantChange db 'Cant change' , 0
+
+    msgVictory db 'VICTORY!!!' , 0
+    msgWrongAnswer db 'Wrong answer... Try Again!' , 0
 
     linhaSudoku TIMES 2 db 0
     colunaSudoku TIMES 2 db 0
@@ -183,6 +196,28 @@ strcpy: ;Função para copiar uma String na outra mov SI, String 1 ; mov DI, Str
     .endloop1:
         ret
 
+strcmp:         ;Função que sera responsavel em corrigir o resultado!
+                ; mov si, string1, mov di, string2
+    .loop1:
+
+        lodsb
+        cmp al, byte[di]
+            jne .notequal
+        cmp al, 0
+        je .equal
+        inc di
+        jmp .loop1
+
+    .notequal:
+
+        clc
+        ret
+
+    .equal:
+
+        stc
+        ret
+
 clearTela:  ;Função responsável por atualizar a tela
 
     mov ah, 0
@@ -258,8 +293,8 @@ menu:   ;Configurações do Menu
 play:   ;Aqui ficara toda a lógica do jogo!
 
     call clearTela  ;Limpa a tela
-    mov SI, linhaSudoku ;Zerando as variaveis antes de iniciar
-    mov al, 0
+    mov al, 0   ;Zerando as variaveis antes de iniciar
+    mov SI, linhaSudoku 
     mov [esi], al        
     mov SI, colunaSudoku 
     mov [esi], al
@@ -358,8 +393,8 @@ play:   ;Aqui ficara toda a lógica do jogo!
         cmp al, 27  ;Se ele receber o "Esc" volta para o Menu!
             je menu
 
-;        cmp al, 13  ;Se ele receber o "Enter" checa a resposta!
-;            je checaResposta
+        cmp al, 13  ;Se ele receber o "Enter" checa a resposta!
+            je .checaResposta
         
         jmp .loop
 
@@ -455,6 +490,63 @@ play:   ;Aqui ficara toda a lógica do jogo!
         call prints
 
         jmp .loop
+
+    .checaResposta: ;Checando a vitoria!
+
+        mov SI, sudokuAnswers
+        mov DI, sudokuPlaying
+        call strcmp
+        jc .victory  ;Se for igual ele pula!
+
+        ;Colocando string "Wrong Answer"
+        mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+        mov bh, 0    ;Pagina 0
+        mov bl, redColor    ;Cor da String em bl
+        mov dh, 15    ;Linha
+        mov dl, 50   ;Coluna
+        int 10h 
+        mov si, msgWrongAnswer
+        call prints
+
+        jmp .loop
+
+    .victory:
+
+        ;Colocando string "msgVictory"
+        mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+        mov bh, 0    ;Pagina 0
+        mov bl, greenColor    ;Cor da String em bl
+        mov dh, 3    ;Linha
+        mov dl, 32   ;Coluna
+        int 10h 
+        mov si, msgVictory
+        call prints
+
+        ;Colocando o sudoku
+        mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+        mov bh, 0    ;Pagina 0
+        mov dh, 8    ;Linha
+        mov dl, 36   ;Coluna
+        int 10h 
+        mov SI, sudokuPlaying  
+        call printsSudoku
+
+        ;Colocando string "stringEsc"
+        mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+        mov bh, 0    ;Pagina 0
+        mov bl,whiteColor    ;Cor da String em bl
+        mov dh, 28    ;Linha
+        mov dl, 32   ;Coluna
+        int 10h 
+        mov si, stringEsc
+        call prints
+
+        call getChar
+
+        cmp al, 27 ;Apertou o ESC
+            je menu
+
+        jmp .victory
 
 howToPlay:  ;Instruções do jogo
 
@@ -624,22 +716,6 @@ reverse:              ; mov si, string , pega a string apontada por si e a rever
     stosb
     loop .loop2
   ret
-
-strcmp:              ; mov si, string1, mov di, string2, compara as strings apontadas por si e di
-  .loop1:
-    lodsb
-    cmp al, byte[di]
-    jne .notequal
-    cmp al, 0
-    je .equal
-    inc di
-    jmp .loop1
-  .notequal:
-    clc
-    ret
-  .equal:
-    stc
-    ret
 
 clear:  ;Função para limpar a tela                  
  
