@@ -33,6 +33,12 @@ data:   ;Todos os dados do programa ficarão aqui
     greenColor equ 2
     redColor equ 4
 
+    ;Table
+
+    initial_posx dw 0 ; posicao inicial x do primeiro pixel
+    initial_posy dw 30 ; posicao inicial y do primeiro pixel
+    line_size dw 20 ; tamanho da linha
+
     sudokuBackup    db '0','7','4','0','0','0','0','8','1'
                     db '6','0','0','4','9','1','0','0','0'
                     db '2','0','0','0','0','5','4','0','3'
@@ -53,7 +59,7 @@ data:   ;Todos os dados do programa ficarão aqui
                     db '4','0','0','3','0','9','6','0','0'
                     db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
 
-    sudokuAnswers    db '5','7','4','2','3','6','9','8','1'
+    sudokuAnswers   db '5','7','4','2','3','6','9','8','1'
                     db '6','8','3','4','9','1','7','5','2'
                     db '2','1','9','7','8','5','4','6','3'
                     db '9','4','8','5','1','2','3','7','6'
@@ -85,6 +91,7 @@ data:   ;Todos os dados do programa ficarão aqui
 
     endl db ' ',13,10,0
 
+
 prints: ;mov si, string (Vai printar a string que o SI esta apontando)
 
     .loop:
@@ -112,7 +119,7 @@ printsSudoku:               ; mov si, string (Vai printar a string que o SI esta
 
         cmp al, '0'         ;Se for '0' muda a cor para vermelho!
             je .putRed
-
+        
         mov bl, greenColor  ;Se não for, printa o verde!
         call putChar
 
@@ -323,7 +330,7 @@ play:   ;Aqui ficara toda a lógica do jogo!
         mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
         mov bh, 0    ;Pagina 0
         mov bl, 02h  ;Cor da String em bl
-        mov dh, 3    ;Linha
+        mov dh, 1    ;Linha
         mov dl, 36   ;Coluna
         int 10h 
         mov si, stringPlayTitle
@@ -332,8 +339,8 @@ play:   ;Aqui ficara toda a lógica do jogo!
         ;Colocando string "stringEsc"
         mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
         mov bh, 0    ;Pagina 0
-        mov bl, 0eh    ;Cor da String em bl
-        mov dh, 29    ;Linha
+        mov bl, 0eh  ;Cor da String em bl
+        mov dh, 29   ;Linha
         mov dl, 32   ;Coluna
         int 10h 
         mov si, stringEsc
@@ -516,8 +523,8 @@ play:   ;Aqui ficara toda a lógica do jogo!
         mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
         mov bh, 0    ;Pagina 0
         mov bl, redColor    ;Cor da String em bl
-        mov dh, 15    ;Linha
-        mov dl, 50   ;Coluna
+        mov dh, 3    ;Linha
+        mov dl, 28   ;Coluna
         int 10h 
         mov si, msgWrongAnswer
         call prints
@@ -531,7 +538,7 @@ play:   ;Aqui ficara toda a lógica do jogo!
         mov bh, 0    ;Pagina 0
         mov bl, greenColor    ;Cor da String em bl
         mov dh, 3    ;Linha
-        mov dl, 32   ;Coluna
+        mov dl, 35   ;Coluna
         int 10h 
         mov si, msgVictory
         call prints
