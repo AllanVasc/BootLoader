@@ -10,11 +10,14 @@ data:   ;Todos os dados do programa ficarão aqui
     stringCredits db 'Credits(3)',0
 
     ;Strings do Play
-    stringPlayTitle db 'Sudoku',0
+    stringPlayTitle db 'Gameplay',0
 
     ;Strings do HowToPlay
     stringHowToPlayTitle db 'How To Play',0
-    stringHowToPlay1 db 'Te vira meu pco...',0
+    stringHowToPlay1 db 'To solve the puzzle, you must fill in all the empty squares',0
+    stringHowToPlay2 db 'without using the same numeral twice in each column, row, or box,',0
+    stringHowToPlay3 db 'and without changing the numerals that are already in the grid.',0
+    stringHowToPlay4 db 'Good luck, and have fun!', 0
     stringEsc   db 'Press ESC to return...',0
 
     ;Strings do Credits
@@ -29,6 +32,12 @@ data:   ;Todos os dados do programa ficarão aqui
     whiteColor equ 15
     greenColor equ 2
     redColor equ 4
+
+    ;Table
+
+    initial_posx dw 0 ; posicao inicial x do primeiro pixel
+    initial_posy dw 30 ; posicao inicial y do primeiro pixel
+    line_size dw 20 ; tamanho da linha
 
     sudokuBackup    db '0','7','4','0','0','0','0','8','1'
                     db '6','0','0','4','9','1','0','0','0'
@@ -50,7 +59,7 @@ data:   ;Todos os dados do programa ficarão aqui
                     db '4','0','0','3','0','9','6','0','0'
                     db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
 
-    sudokuAnswers    db '5','7','4','2','3','6','9','8','1'
+    sudokuAnswers   db '5','7','4','2','3','6','9','8','1'
                     db '6','8','3','4','9','1','7','5','2'
                     db '2','1','9','7','8','5','4','6','3'
                     db '9','4','8','5','1','2','3','7','6'
@@ -82,6 +91,7 @@ data:   ;Todos os dados do programa ficarão aqui
 
     endl db ' ',13,10,0
 
+
 prints: ;mov si, string (Vai printar a string que o SI esta apontando)
 
     .loop:
@@ -109,7 +119,7 @@ printsSudoku:               ; mov si, string (Vai printar a string que o SI esta
 
         cmp al, '0'         ;Se for '0' muda a cor para vermelho!
             je .putRed
-
+        
         mov bl, greenColor  ;Se não for, printa o verde!
         call putChar
 
@@ -238,12 +248,17 @@ menu:   ;Configurações do Menu
 
     call clearTela  ;Configurando o modo de video
 
+    mov ah, 0bh ; inicia configuracao de background
+    mov bh, 00h ; configuracao da cor do background
+    mov bl, 09h ; escolhi o azul claro como a cor do background. Ha 16 cores possiveis, de 0 a F (em hexadecimal).
+    int 10h     ; interrupcao para executar as configuracoes dessas linhas acima
+
     ;Colocando string "stringTitle"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,whiteColor   ;Cor da String em bl
+    mov bl, 0ah   ;Cor da String em bl (verde clara)
 	mov dh, 3    ;Linha
-	mov dl, 32   ;Coluna
+	mov dl, 33   ;Coluna
 	int 10h 
     mov si, stringTitle
     call prints
@@ -251,6 +266,7 @@ menu:   ;Configurações do Menu
     ;Colocando string "stringPlay"
     mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
+    mov bl, whiteColor ; retornando para a cor branca (na string title colocamos a verde)
 	mov dh, whiteColor   ;Linha
 	mov dl, 32   ;Coluna
 	int 10h
@@ -261,7 +277,7 @@ menu:   ;Configurações do Menu
     mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
 	mov dh, 20   ;Linha
-	mov dl, 32   ;Coluna
+	mov dl, 31   ;Coluna
 	int 10h
     mov si, stringHowToPlay
     call prints
@@ -270,7 +286,7 @@ menu:   ;Configurações do Menu
     mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
 	mov dh, 25   ;Linha
-	mov dl, 32   ;Coluna
+	mov dl, 33   ;Coluna
 	int 10h
     mov si, stringCredits
     call prints
@@ -305,12 +321,17 @@ play:   ;Aqui ficara toda a lógica do jogo!
 
     .loop:
 
+        mov ah, 0bh ; inicia configuracao de background
+        mov bh, 00h ; configuracao da cor do background
+        mov bl, 07h ; escolhi o cinza claro como a cor do background. Ha 16 cores possiveis, de 0 a F (em hexadecimal).
+        int 10h     ; interrupcao para executar as configuracoes dessas linhas acima
+
         ;Colocando string "stringPlayTitle"
         mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
         mov bh, 0    ;Pagina 0
-        mov bl,whiteColor    ;Cor da String em bl
-        mov dh, 3    ;Linha
-        mov dl, 32   ;Coluna
+        mov bl, 02h  ;Cor da String em bl
+        mov dh, 1    ;Linha
+        mov dl, 36   ;Coluna
         int 10h 
         mov si, stringPlayTitle
         call prints
@@ -318,8 +339,8 @@ play:   ;Aqui ficara toda a lógica do jogo!
         ;Colocando string "stringEsc"
         mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
         mov bh, 0    ;Pagina 0
-        mov bl,whiteColor    ;Cor da String em bl
-        mov dh, 28    ;Linha
+        mov bl, 0eh  ;Cor da String em bl
+        mov dh, 29   ;Linha
         mov dl, 32   ;Coluna
         int 10h 
         mov si, stringEsc
@@ -502,8 +523,8 @@ play:   ;Aqui ficara toda a lógica do jogo!
         mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
         mov bh, 0    ;Pagina 0
         mov bl, redColor    ;Cor da String em bl
-        mov dh, 15    ;Linha
-        mov dl, 50   ;Coluna
+        mov dh, 3    ;Linha
+        mov dl, 28   ;Coluna
         int 10h 
         mov si, msgWrongAnswer
         call prints
@@ -517,7 +538,7 @@ play:   ;Aqui ficara toda a lógica do jogo!
         mov bh, 0    ;Pagina 0
         mov bl, greenColor    ;Cor da String em bl
         mov dh, 3    ;Linha
-        mov dl, 32   ;Coluna
+        mov dl, 35   ;Coluna
         int 10h 
         mov si, msgVictory
         call prints
@@ -552,12 +573,17 @@ howToPlay:  ;Instruções do jogo
 
     call clearTela  ;Limpa a tela
 
+    mov ah, 0bh ; inicia configuracao de background
+    mov bh, 00h ; configuracao da cor do background
+    mov bl, 09h ; escolhi o azul claro como a cor do background. Ha 16 cores possiveis, de 0 a F (em hexadecimal).
+    int 10h     ; interrupcao para executar as configuracoes dessas linhas acima
+
     ;Colocando string "stringHowToPlayTitle"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,whiteColor    ;Cor da String em bl
+    mov bl,0ah   ;Cor da String em bl (verde claro)
 	mov dh, 3    ;Linha
-	mov dl, 32   ;Coluna
+	mov dl, 34   ;Coluna
 	int 10h 
     mov si, stringHowToPlayTitle
     call prints
@@ -567,17 +593,47 @@ howToPlay:  ;Instruções do jogo
 	mov bh, 0    ;Pagina 0
     mov bl,whiteColor    ;Cor da String em bl
 	mov dh, 10    ;Linha
-	mov dl, 32   ;Coluna
+	mov dl, 7   ;Coluna
 	int 10h 
     mov si, stringHowToPlay1
+    call prints
+
+    ;Colocando string "stringHowToPlay2"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,whiteColor    ;Cor da String em bl
+	mov dh, 11    ;Linha
+	mov dl, 7   ;Coluna
+	int 10h 
+    mov si, stringHowToPlay2
+    call prints
+
+    ;Colocando string "stringHowToPlay3"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,whiteColor    ;Cor da String em bl
+	mov dh, 12    ;Linha
+	mov dl, 7   ;Coluna
+	int 10h 
+    mov si, stringHowToPlay3
+    call prints
+
+    ;Colocando string "stringHowToPlay4"
+	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
+	mov bh, 0    ;Pagina 0
+    mov bl,whiteColor    ;Cor da String em bl
+	mov dh, 20    ;Linha
+	mov dl, 26   ;Coluna
+	int 10h 
+    mov si, stringHowToPlay4
     call prints
 
     ;Colocando string "stringEsc"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,whiteColor    ;Cor da String em bl
-	mov dh, 28    ;Linha
-	mov dl, 32   ;Coluna
+    mov bl, 0eh    ;Cor amarela
+	mov dh, 29    ;Linha
+	mov dl, 28   ;Coluna
 	int 10h 
     mov si, stringEsc
     call prints
@@ -597,12 +653,17 @@ credits:    ;Créditos do jogo
 
     call clearTela  ;Limpa a tela
 
+    mov ah, 0bh ; inicia configuracao de background
+    mov bh, 00h ; configuracao da cor do background
+    mov bl, 09h ; escolhi o azul claro como a cor do background. Ha 16 cores possiveis, de 0 a F (em hexadecimal).
+    int 10h     ; interrupcao para executar as configuracoes dessas linhas acima
+
     ;Colocando string "stringCreditsTitle"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,whiteColor    ;Cor da String em bl
+    mov bl, 0ah  ;Cor da String em bl (verde claro)
 	mov dh, 3    ;Linha
-	mov dl, 32   ;Coluna
+	mov dl, 36   ;Coluna
 	int 10h 
     mov si, stringCreditsTitle
     call prints
@@ -611,7 +672,7 @@ credits:    ;Créditos do jogo
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
     mov bl,whiteColor    ;Cor da String em bl
-	mov dh, 10    ;Linha
+	mov dh, 12    ;Linha
 	mov dl, 5   ;Coluna
 	int 10h 
     mov si, stringCredits1
@@ -621,7 +682,7 @@ credits:    ;Créditos do jogo
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
     mov bl,whiteColor    ;Cor da String em bl
-	mov dh, 11    ;Linha
+	mov dh, 13    ;Linha
 	mov dl, 5   ;Coluna
 	int 10h 
     mov si, stringCredits2
@@ -631,7 +692,7 @@ credits:    ;Créditos do jogo
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
     mov bl,whiteColor    ;Cor da String em bl
-	mov dh, 12    ;Linha
+	mov dh, 14    ;Linha
 	mov dl, 5   ;Coluna
 	int 10h 
     mov si, stringCredits3
@@ -641,7 +702,7 @@ credits:    ;Créditos do jogo
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
     mov bl,whiteColor    ;Cor da String em bl
-	mov dh, 13    ;Linha
+	mov dh, 15    ;Linha
 	mov dl, 5   ;Coluna
 	int 10h 
     mov si, stringCredits4
@@ -650,8 +711,8 @@ credits:    ;Créditos do jogo
     ;Colocando string "stringEsc"
 	mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
 	mov bh, 0    ;Pagina 0
-    mov bl,whiteColor    ;Cor da String em bl
-	mov dh, 28    ;Linha
+    mov bl, 0eh  ;Cor da String em bl (yellow)
+	mov dh, 28   ;Linha
 	mov dl, 32   ;Coluna
 	int 10h 
     mov si, stringEsc
