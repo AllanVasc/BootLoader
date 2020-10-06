@@ -33,45 +33,111 @@ data:   ;Todos os dados do programa ficarão aqui
     greenColor equ 2
     redColor equ 4
 
-    sudokuBackup    db '0','7','4','0','0','0','0','8','1'
-                    db '6','0','0','4','9','1','0','0','0'
-                    db '2','0','0','0','0','5','4','0','3'
-                    db '0','4','0','0','1','2','3','7','0'
-                    db '0','3','0','9','4','0','1','0','5'
-                    db '0','5','2','6','0','3','0','4','0'
-                    db '0','0','1','8','2','0','0','9','4'
-                    db '4','0','0','3','0','9','6','0','0'
-                    db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
+    ; table data
+    lineSize dw 145 ; tamanho da linha
+    columnSize dw 155 ; tamanho da coluna. Por algum bug desconhecido, tivemos que ir reduzindo o tamanho da coluna
+    columnSize1 dw 138
+    columnSize2 dw 121
+    columnSize3 dw 105
+    columnSize4 dw 90
+    columnSize5 dw 74
+    columnSize6 dw 58
+    columnSize7 dw 40
+    columnSize8 dw 25
+    columnSize9 dw 10
+    initialPosx1 dw 250 ; posicao inicial x do primeiro pixel
+    initialPosx2 dw 267
+    initialPosx3 dw 284
+    initialPosx4 dw 299
+    initialPosx5 dw 316
+    initialPosx6 dw 332
+    initialPosx7 dw 347
+    initialPosx8 dw 364
+    initialPosx9 dw 380
+    initialPosx10 dw 396
+    initialPosy0 dw 118 ; posicao inicial y do primeiro pixel
+    initialPosy1 dw 150
+    initialPosy2 dw 182
+    initialPosy3 dw 214
+    initialPosy4 dw 246
+    initialPosy5 dw 278
+    initialPosy6 dw 310
+    initialPosy7 dw 342
+    initialPosy8 dw 374
+    initialPosy9 dw 406
 
-    sudokuPlaying   db '0','7','4','0','0','0','0','8','1'
-                    db '6','0','0','4','9','1','0','0','0'
-                    db '2','0','0','0','0','5','4','0','3'
-                    db '0','4','0','0','1','2','3','7','0'
-                    db '0','3','0','9','4','0','1','0','5'
-                    db '0','5','2','6','0','3','0','4','0'
-                    db '0','0','1','8','2','0','0','9','4'
-                    db '4','0','0','3','0','9','6','0','0'
-                    db '8','0','5','0','6','0','2','0','0', 0 ;Esse 0 a mais sinaliza o fim!
 
-    sudokuAnswers   db '5','7','4','2','3','6','9','8','1'
-                    db '6','8','3','4','9','1','7','5','2'
-                    db '2','1','9','7','8','5','4','6','3'
-                    db '9','4','8','5','1','2','3','7','6'
-                    db '7','3','6','9','4','8','1','2','5'
-                    db '1','5','2','6','7','3','8','4','9'
-                    db '3','6','1','8','2','7','5','9','4'
-                    db '4','2','7','3','5','9','6','1','8'
-                    db '8','9','5','1','6','4','2','3','7', 0 ;Esse 0 a mais sinaliza o fim!
+    sudokuBackup    db '0',' ','7',' ','4',' ','0',' ','0',' ','0',' ','0',' ','8',' ','1'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '6',' ','0',' ','0',' ','4',' ','9',' ','1',' ','0',' ','0',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '2',' ','0',' ','0',' ','0',' ','0',' ','5',' ','4',' ','0',' ','3'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','4',' ','0',' ','0',' ','1',' ','2',' ','3',' ','7',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','3',' ','0',' ','9',' ','4',' ','0',' ','1',' ','0',' ','5'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','5',' ','2',' ','6',' ','0',' ','3',' ','0',' ','4',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','0',' ','1',' ','8',' ','2',' ','0',' ','0',' ','9',' ','4'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '4',' ','0',' ','0',' ','3',' ','0',' ','9',' ','6',' ','0',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '8',' ','0',' ','5',' ','0',' ','6',' ','0',' ','2',' ','0',' ','0', 0 ;Esse 0 a mais sinaliza o fim!
 
-    CanChangeSudoku db '1','0','0','1','1','1','1','0','0'
-                    db '0','1','1','0','0','0','1','1','1'
-                    db '0','1','1','1','1','0','0','1','0'
-                    db '1','0','1','1','0','0','0','0','1'
-                    db '1','0','1','0','0','1','0','1','0'
-                    db '1','0','0','0','1','0','1','0','1'
-                    db '1','1','0','0','0','1','1','0','0'
-                    db '0','1','1','0','1','0','0','1','1'
-                    db '0','1','0','1','0','1','0','1','1', 0 ;Esse 0 a mais sinaliza o fim! 
+    sudokuPlaying   db '0',' ','7',' ','4',' ','0',' ','0',' ','0',' ','0',' ','8',' ','1'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '6',' ','0',' ','0',' ','4',' ','9',' ','1',' ','0',' ','0',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '2',' ','0',' ','0',' ','0',' ','0',' ','5',' ','4',' ','0',' ','3'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','4',' ','0',' ','0',' ','1',' ','2',' ','3',' ','7',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','3',' ','0',' ','9',' ','4',' ','0',' ','1',' ','0',' ','5'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','5',' ','2',' ','6',' ','0',' ','3',' ','0',' ','4',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','0',' ','1',' ','8',' ','2',' ','0',' ','0',' ','9',' ','4'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '4',' ','0',' ','0',' ','3',' ','0',' ','9',' ','6',' ','0',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '8',' ','0',' ','5',' ','0',' ','6',' ','0',' ','2',' ','0',' ','0', 0 ;Esse 0 a mais sinaliza o fim!
+
+    sudokuAnswers   db '5',' ','7',' ','4',' ','2',' ','3',' ','6',' ','9',' ','8',' ','1'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '6',' ','8',' ','3',' ','4',' ','9',' ','1',' ','7',' ','5',' ','2'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '2',' ','1',' ','9',' ','7',' ','8',' ','5',' ','4',' ','6',' ','3'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '9',' ','4',' ','8',' ','5',' ','1',' ','2',' ','3',' ','7',' ','6'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '7',' ','3',' ','6',' ','9',' ','4',' ','8',' ','1',' ','2',' ','5'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '1',' ','5',' ','2',' ','6',' ','7',' ','3',' ','8',' ','4',' ','9'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '3',' ','6',' ','1',' ','8',' ','2',' ','7',' ','5',' ','9',' ','4'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '4',' ','2',' ','7',' ','3',' ','5',' ','9',' ','6',' ','1',' ','8'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '8',' ','9',' ','5',' ','1',' ','6',' ','4',' ','2',' ','3',' ','7', 0 ;Esse 0 a mais sinaliza o fim!
+
+    CanChangeSudoku db '1',' ','0',' ','0',' ','1',' ','1',' ','1',' ','1',' ','0',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','1',' ','1',' ','0',' ','0',' ','0',' ','1',' ','1',' ','1'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','1',' ','1',' ','1',' ','1',' ','0',' ','0',' ','1',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '1',' ','0',' ','1',' ','1',' ','0',' ','0',' ','0',' ','0',' ','1'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '1',' ','0',' ','1',' ','0',' ','0',' ','1',' ','0',' ','1',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '1',' ','0',' ','0',' ','0',' ','1',' ','0',' ','1',' ','0',' ','1'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '1',' ','1',' ','0',' ','0',' ','0',' ','1',' ','1',' ','0',' ','0'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','1',' ','1',' ','0',' ','1',' ','0',' ','0',' ','1',' ','1'
+                    db ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
+                    db '0',' ','1',' ','0',' ','1',' ','0',' ','1',' ','0',' ','1',' ','1', 0 ;Esse 0 a mais sinaliza o fim! 
 
     msgLinhaAtual db 'Linha:' , 0
     msgColunaAtual db 'Coluna:' , 0
@@ -118,7 +184,7 @@ printsSudoku:               ; mov si, string (Vai printar a string que o SI esta
         call putChar
 
         inc cx              ;Contando a quantidade de digitos
-        cmp cx, 9           ;Se for igual a 9 precisa pular a linha
+        cmp cx, 17          ;Se for igual a 17 precisa pular a linha
             je .putEndl
 
         jmp .loop
@@ -129,7 +195,7 @@ printsSudoku:               ; mov si, string (Vai printar a string que o SI esta
         call putChar
 
         inc cx              ;Contando a quantidade de digitos
-        cmp cx, 9           ;Se for igual a 9 precisa pular a linha
+        cmp cx, 17           ;Se for igual a 17 precisa pular a linha
             je .putEndl
 
         jmp .loop
@@ -153,7 +219,7 @@ colocaEspaco:       ;Usada para centralizar o sudoku no meio da tela
 
     .loop:
 
-        cmp cx,36   ;Modificar esse número para centralização
+        cmp cx,32   ;Modificar esse número para centralização
             je .done
 
         mov al, ' '
@@ -228,6 +294,419 @@ clearTela:  ;Função responsável por atualizar a tela
     mov al,12h
     int 10h
     ret
+
+print_line:
+
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop0:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop0 
+    
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy2
+    mov dx, [si] ; posicao inicial de y
+
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy1
+    mov dx, [si] ; posicao inicial de y
+
+    .loop1:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop1 
+    
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy2
+    mov dx, [si] ; posicao inicial de y
+
+    .loop2:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop2 
+    
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy3
+    mov dx, [si] ; posicao inicial de y
+
+    .loop3:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop3 
+
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy4
+    mov dx, [si] ; posicao inicial de y
+
+    .loop4:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop4 
+
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy5
+    mov dx, [si] ; posicao inicial de y
+
+    .loop5:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop5 
+
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy6
+    mov dx, [si] ; posicao inicial de y
+
+    .loop6:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop6 
+
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy7
+    mov dx, [si] ; posicao inicial de y
+
+    .loop7:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop7 
+
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy8
+    mov dx, [si] ; posicao inicial de y
+
+    .loop8:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop8
+
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy9
+    mov dx, [si] ; posicao inicial de y
+
+    .loop9:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc cx      ; cx = cx + 1
+        mov ax, cx  ; vamos usar ax como um auxiliar, para ver se a linha ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, lineSize 
+        cmp ax, [si]
+        jng .loop9 
+        ret
+
+print_column:
+
+    mov si, initialPosx1
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop0:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx1
+        sub ax, [si]
+        mov si, columnSize 
+        cmp ax, [si]
+        jng .loop0
+    
+    mov si, initialPosx2
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop1:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx2
+        sub ax, [si]
+        mov si, columnSize1
+        cmp ax, [si]
+        jng .loop1
+    
+    mov si, initialPosx3
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop2:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx3
+        sub ax, [si]
+        mov si, columnSize2 
+        cmp ax, [si]
+        jng .loop2
+    
+    mov si, initialPosx4
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop3:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx4
+        sub ax, [si]
+        mov si, columnSize3 
+        cmp ax, [si]
+        jng .loop3
+    
+    mov si, initialPosx5
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop4:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx5
+        sub ax, [si]
+        mov si, columnSize4 
+        cmp ax, [si]
+        jng .loop4
+    
+    mov si, initialPosx6
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop5:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx6
+        sub ax, [si]
+        mov si, columnSize5 
+        cmp ax, [si]
+        jng .loop5
+    
+    mov si, initialPosx7
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop6:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx7
+        sub ax, [si]
+        mov si, columnSize6 
+        cmp ax, [si]
+        jng .loop6
+    
+    mov si, initialPosx8
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop7:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx8
+        sub ax, [si]
+        mov si, columnSize7 
+        cmp ax, [si]
+        jng .loop7
+    
+    mov si, initialPosx9
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop8:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx9
+        sub ax, [si]
+        mov si, columnSize8 
+        cmp ax, [si]
+        jng .loop8
+    
+    mov si, initialPosx10
+    mov cx, [si] ; posicao inicial de x
+    mov si, initialPosy0
+    mov dx, [si] ; posicao inicial de y
+
+    .loop9:
+
+        mov ah, 0ch ; inicia a configuracao para escrever na tela
+        mov al, 0fh ; escolhi a cor branca
+        mov bh, 00h ; configura o numero da pagina
+        int 10h     ; interrupcao para executar as configuracoes acima
+
+        inc dx      ; dx = dx + 1
+        mov ax, dx  ; vamos usar ax como um auxiliar, para ver se a coluna ja foi printada por completo
+        mov si, initialPosx10
+        sub ax, [si]
+        mov si, columnSize9
+        cmp ax, [si]
+        jng .loop9
+        ret
+    
+
 
 start:
     
@@ -344,10 +823,13 @@ play:   ;Aqui ficara toda a lógica do jogo!
         mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
         mov bh, 0    ;Pagina 0
         mov dh, 8    ;Linha
-        mov dl, 36   ;Coluna
+        mov dl, 32   ;Coluna
         int 10h 
         mov SI, sudokuPlaying  
         call printsSudoku
+
+        call print_line
+        call print_column
 
         ;Debugando para saber a linha e a coluna atual!
         call putEndl
@@ -366,7 +848,7 @@ play:   ;Aqui ficara toda a lógica do jogo!
         call prints
         mov SI, colunaSudoku  
         mov al, [esi]      ; Load a double word from memory into eax
-        add al,'0'
+        add al, '0'
         call putChar
 
         ;Lógica de incrementar e decrementar a linha e a coluna
@@ -421,6 +903,7 @@ play:   ;Aqui ficara toda a lógica do jogo!
             je .loop
 
         dec al
+        dec al
         mov [esi], al      ; Store a double word in eax into memory
         call clearTela
 
@@ -434,6 +917,7 @@ play:   ;Aqui ficara toda a lógica do jogo!
             je .loop
 
         dec al
+        dec al
         mov [esi], al      ; Store a double word in eax into memory
         call clearTela
 
@@ -443,9 +927,10 @@ play:   ;Aqui ficara toda a lógica do jogo!
 
         mov SI, linhaSudoku  
         mov al, [esi]      ; Load a double word from memory into eax
-        cmp al, 8          ;Se já esta no limite não faz nada
+        cmp al, 16         ;Se já esta no limite não faz nada
             je .loop
 
+        inc al
         inc al
         mov [esi], al      ; Store a double wosrd in eax into memory
         call clearTela
@@ -456,9 +941,10 @@ play:   ;Aqui ficara toda a lógica do jogo!
 
         mov SI, colunaSudoku  
         mov al, [esi]      ; Load a double word from memory into eax
-        cmp al, 8          ;Se já esta no limite não faz nada
+        cmp al, 16          ;Se já esta no limite não faz nada
             je .loop
 
+        inc al
         inc al
         mov [esi], al      ; Store a double word in eax into memory
         call clearTela
@@ -475,7 +961,7 @@ play:   ;Aqui ficara toda a lógica do jogo!
         mov SI, colunaSudoku  
         mov dl, [esi]      ; Load a double word from memory into eax
 
-        mov al, 9           ;Inicio do calculo da posição da matriz!
+        mov al, 17           ;Inicio do calculo da posição da matriz!
         mul DH              ; AL = AL * DH
         add al, dl          ;O valor da posição da matriz estara em al!
         mov edi, eax        ;Passando valor de al para o registrador de segmento(como se fosse ponteiro)
@@ -541,7 +1027,7 @@ play:   ;Aqui ficara toda a lógica do jogo!
         mov ah, 02h  ;Permite que a gente coloque a string em alguma posicao da tela (set cursor)
         mov bh, 0    ;Pagina 0
         mov dh, 8    ;Linha
-        mov dl, 36   ;Coluna
+        mov dl, 32   ;Coluna
         int 10h 
         mov SI, sudokuPlaying  
         call printsSudoku
