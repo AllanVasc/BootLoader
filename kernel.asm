@@ -705,7 +705,54 @@ print_column:
         cmp ax, [si]
         jng .loop9
         ret
-    
+corrigeNumero:
+
+    cmp al, 0
+        je .corrige0
+    cmp al, 2
+        je .corrige1
+    cmp al, 4
+        je .corrige2
+    cmp al, 6
+        je .corrige3
+    cmp al, 8
+        je .corrige4
+    cmp al, 10
+        je .corrige5
+    cmp al, 12
+        je .corrige6
+    cmp al, 14
+        je .corrige7
+    cmp al, 16
+        je .corrige8
+
+    .corrige0:
+        mov al, 0
+        ret
+    .corrige1:
+        mov al, 1
+        ret
+    .corrige2:
+        mov al, 2
+        ret
+    .corrige3:
+        mov al, 3
+        ret
+    .corrige4:
+        mov al, 4
+        ret
+    .corrige5:
+        mov al, 5
+        ret
+    .corrige6:
+        mov al, 6
+        ret
+    .corrige7:
+        mov al, 7
+        ret
+    .corrige8:
+        mov al, 8
+        ret
 
 
 start:
@@ -834,11 +881,12 @@ play:   ;Aqui ficara toda a lógica do jogo!
         ;Debugando para saber a linha e a coluna atual!
         call putEndl
         mov bl, whiteColor
+
         mov SI, msgLinhaAtual  
         call prints
-
         mov SI, linhaSudoku ;SI ira apontar para o endereço da variavel  
         mov al, [esi]       ;Pegamos o valor o qual o SI está apontando 
+        call corrigeNumero
         add al,'0'
         call putChar
 
@@ -848,6 +896,7 @@ play:   ;Aqui ficara toda a lógica do jogo!
         call prints
         mov SI, colunaSudoku  
         mov al, [esi]      ; Load a double word from memory into eax
+        call corrigeNumero
         add al, '0'
         call putChar
 
